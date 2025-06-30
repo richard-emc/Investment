@@ -37,7 +37,7 @@ struct Ativo {
         preco_medio = (total_atual + total_novo) / quantidade;
     }
 
-        // Atualiza ativo ao vender
+    // Atualiza ativo ao vender
     // Retorna false se quantidade a vender maior que disponível
     bool atualizarVenda(double qnt) {
         if (qnt > quantidade) return false;

@@ -6,66 +6,70 @@
 int main() {
     Carteira minhaCarteira;
     InputManager inputManager;
+    const std::string CAMINHO_CARTEIRA = "carteira.csv";
+    const std::string CAMINHO_ORDENS = "historico_ordens.csv";
+
+    // Carrega histórico de ordens se existir
+    if (std::filesystem::exists(CAMINHO_ORDENS)) {
+        inputManager.carregarHistoricoDeOrdens(minhaCarteira, CAMINHO_ORDENS);
+        inputManager.salvarHistoricoOrdens(CAMINHO_ORDENS, minhaCarteira.getOrdens());
+        std::cout << "Histórico de ordens carregado de '" << CAMINHO_ORDENS << "'\n";
+    }
+
+
     int escolha;
-    const std::string CAMINHO_PADRAO = "carteira.csv";
-
-    // 🔁 Carregar carteira automaticamente, se o arquivo existir
-    if (std::filesystem::exists(CAMINHO_PADRAO)) {
-        inputManager.carregarCSV(minhaCarteira, CAMINHO_PADRAO);
-        std::cout << "📂 Carteira carregada automaticamente de '" << CAMINHO_PADRAO << "'.\n\n";
-    } else {
-        std::cout << "📁 Nenhum arquivo de carteira encontrado. Começando com carteira vazia.\n\n";
-    }   
-
-
-    while (true) {
+    do {
         std::cout << "\n===== Menu =====\n";
-        std::cout << "1 - Inserir ativo manualmente\n";
-        std::cout << "2 - Carregar ativos de arquivo CSV\n";
+        std::cout << "1 - Inserir ordem manualmente\n";
+        std::cout << "2 - Carregar ordens de arquivo CSV\n";
         std::cout << "3 - Listar ativos\n";
-        std::cout << "4 - Salvar carteira em CSV\n";   
+        std::cout << "4 - Salvar carteira e histórico de ordens\n";
         std::cout << "5 - Sair\n";
         std::cout << "Escolha: ";
         std::cin >> escolha;
 
-        if (std::cin.fail()) {
+        if(std::cin.fail()) {
             std::cin.clear();
             std::cin.ignore(10000, '\n');
-            std::cout << "Entrada inválida, tente novamente.\n";
+            std::cout << "Entrada inválida. Tente novamente.\n";
             continue;
         }
 
-        switch (escolha) {
+        switch(escolha) {
             case 1:
-                inputManager.inserirManual(minhaCarteira);
+                inputManager.inserirOrdemManual(minhaCarteira); // Função que pede dados da ordem e aplica
                 break;
+
             case 2: {
-                std::string caminho;
-                std::cout << "Digite o caminho do arquivo CSV: ";
-                std::cin.ignore(); // limpa o '\n'
-                std::getline(std::cin, caminho);
-                inputManager.carregarCSV(minhaCarteira, caminho);
-                break;
-            }
-            case 3:
-                minhaCarteira.listarAtivos();  // Implemente essa função para mostrar os ativos
-                break;
-            case 4:{
-                std::string caminhoSalvar;
-                std::cout << "Digite o caminho para salvar a carteira em CSV: ";
                 std::cin.ignore();
-                std::getline(std::cin, caminhoSalvar);
-                minhaCarteira.salvarCSV(caminhoSalvar);
+                std::string caminhoOrdens;
+                std::cout << "Digite o caminho do arquivo CSV de ordens: ";
+                std::getline(std::cin, caminhoOrdens);
+                inputManager.carregarHistoricoDeOrdens(minhaCarteira, caminhoOrdens);
                 break;
             }
-            case 5:{
-                minhaCarteira.salvarCSV(CAMINHO_PADRAO);
-                std::cout << "💾 Carteira salva automaticamente em '" << CAMINHO_PADRAO << "'.\n";
-                std::cout << "Saindo...\n";
-                return 0;
-            }
+
+            case 3:
+                minhaCarteira.listarAtivos();
+                break;
+
+            case 4:
+                minhaCarteira.salvarCSV(CAMINHO_CARTEIRA);
+                inputManager.salvarHistoricoOrdens(CAMINHO_ORDENS, minhaCarteira.getOrdens());
+                std::cout << "Carteira e histórico salvos.\n";
+                break;
+
+            case 5:
+                minhaCarteira.salvarCSV(CAMINHO_CARTEIRA);
+                inputManager.salvarHistoricoOrdens(CAMINHO_ORDENS, minhaCarteira.getOrdens());
+                std::cout << "Saindo... Carteira e histórico salvos.\n";
+                break;
+
             default:
                 std::cout << "Opção inválida.\n";
         }
-    }
+    } while (escolha != 5);
+
+    return 0;
 }
+

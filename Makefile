@@ -5,7 +5,7 @@ CXX = g++
 CXXFLAGS = -Wall -std=c++17
 
 # Arquivos-fonte
-SRC = src/main.cpp src/carteira.cpp src/inputmanager.cpp
+SRC = src/main.cpp src/carteira.cpp src/inputmanager.cpp src/ordem.cpp src/ativo.hpp
 
 # Nome do programa final
 EXEC = carteira

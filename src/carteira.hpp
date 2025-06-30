@@ -7,10 +7,14 @@
 
 class Carteira {
 public:
+    void limpar();
     void adicionarAtivo(const Ativo& ativo);
     void listarAtivos() const;
     void salvarCSV(const std::string& caminhoArquivo) const;
     void carregarCSV(const std::string& caminhoArquivo);
+    // Getter para o vetor de ordens
+    const std::vector<Ordem>& getOrdens() const;
+
 
     // Busca ativo pelo ticker e corretora, retorna ponteiro ou nullptr
     Ativo* buscarAtivo(const std::string& ticker, const std::string& corretora);
@@ -20,6 +24,7 @@ public:
 
 private:
     std::vector<Ativo> ativos;
+    std::vector<Ordem> ordens;
 };
     std::string tipoParaString(TipoAtivo tipo);
 

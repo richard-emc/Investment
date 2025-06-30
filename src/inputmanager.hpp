@@ -6,8 +6,10 @@
 
 class InputManager {
 public:
-    static void inserirManual(Carteira& carteira);
-    static void carregarCSV(Carteira& carteira, const std::string& caminhoArquivo);
+    void inserirOrdemManual(Carteira& carteira);
+    void carregarCSV(Carteira& carteira, const std::string& caminhoArquivo);
+    void carregarHistoricoDeOrdens(Carteira& carteira, const std::string& caminhoHistorico);
+    void salvarHistoricoOrdens(const std::string& caminhoArquivo, const std::vector<Ordem>& ordens);
 };
 
 #endif
