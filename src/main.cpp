@@ -19,12 +19,13 @@ int main() {
 
     int escolha;
     do {
-        std::cout << "\n===== Menu =====\n";
+        std::cout << "===== Menu =====\n";
         std::cout << "1 - Inserir ordem manualmente\n";
         std::cout << "2 - Carregar ordens de arquivo CSV\n";
         std::cout << "3 - Listar ativos\n";
         std::cout << "4 - Salvar carteira e histórico de ordens\n";
-        std::cout << "5 - Sair\n";
+        std::cout << "5 - Mostrar ordens por ticker\n";
+        std::cout << "6 - Sair\n";
         std::cout << "Escolha: ";
         std::cin >> escolha;
 
@@ -59,7 +60,29 @@ int main() {
                 std::cout << "Carteira e histórico salvos.\n";
                 break;
 
-            case 5:
+            case 5: {
+                std::cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n'); // limpa o buffer
+                std::string tickerConsulta;
+                std::cout << "Digite o ticker para mostrar ordens: ";
+                std::getline(std::cin, tickerConsulta);
+                auto ordensTicker = minhaCarteira.buscarOrdensPorTicker(tickerConsulta);
+                if (ordensTicker.empty()) {
+                    std::cout << "Nenhuma ordem encontrada para o ticker " << tickerConsulta << ".\n";
+                } else {
+                    std::cout << "Ordens para " << tickerConsulta << ":\n";
+                for (const auto& ordem : ordensTicker) {
+                    std::cout << (ordem.tipo == TipoOrdem::COMPRA ? "COMPRA" : "VENDA")
+                          << " | Corretora: " << ordem.corretora
+                          << " | Quantidade: " << ordem.quantidade
+                          << " | Preço: " << ordem.preco
+                          << " | Data: " << ordem.data << "\n";
+                    }
+                }
+                break;
+                }
+
+
+            case 6:
                 minhaCarteira.salvarCSV(CAMINHO_CARTEIRA);
                 inputManager.salvarHistoricoOrdens(CAMINHO_ORDENS, minhaCarteira.getOrdens());
                 std::cout << "Saindo... Carteira e histórico salvos.\n";
@@ -68,7 +91,7 @@ int main() {
             default:
                 std::cout << "Opção inválida.\n";
         }
-    } while (escolha != 5);
+    } while (escolha != 6);
 
     return 0;
 }

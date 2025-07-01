@@ -97,6 +97,16 @@ void Carteira::listarAtivos() const {
     }
 }
 
+std::vector<Ordem> Carteira::buscarOrdensPorTicker(const std::string& ticker) const {
+    std::vector<Ordem> resultado;
+    for (const auto& ordem : ordens) {
+        if (ordem.ticker == ticker) {
+            resultado.push_back(ordem);
+        }
+    }
+    return resultado;
+}
+
 // Retorna referência constante para o vetor de ordens
 const std::vector<Ordem>& Carteira::getOrdens() const {
     return ordens;
