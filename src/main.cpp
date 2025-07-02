@@ -65,6 +65,7 @@ int main() {
                 std::string tickerConsulta;
                 std::cout << "Digite o ticker para mostrar ordens: ";
                 std::getline(std::cin, tickerConsulta);
+                tickerConsulta = paraMaiusculas(tickerConsulta);
                 auto ordensTicker = minhaCarteira.buscarOrdensPorTicker(tickerConsulta);
                 if (ordensTicker.empty()) {
                     std::cout << "Nenhuma ordem encontrada para o ticker " << tickerConsulta << ".\n";

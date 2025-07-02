@@ -74,12 +74,12 @@ void InputManager::inserirOrdemManual(Carteira& carteira) {
 
     std::cout << "Ticker: ";
     std::cin >> ordem.ticker;
-    // Transformar ticker em maiúsculo (exemplo)
-    std::transform(ordem.ticker.begin(), ordem.ticker.end(), ordem.ticker.begin(), ::toupper);
+    ordem.ticker = paraMaiusculas(ordem.ticker);
+
 
     std::cout << "Tipo (COMPRA/VENDA): ";
     std::cin >> tipoStr;
-    std::transform(tipoStr.begin(), tipoStr.end(), tipoStr.begin(), ::toupper);
+    tipoStr = paraMaiusculas(tipoStr);
     if (tipoStr == "COMPRA") ordem.tipo = TipoOrdem::COMPRA;
     else if (tipoStr == "VENDA") ordem.tipo = TipoOrdem::VENDA;
     else {
@@ -90,6 +90,7 @@ void InputManager::inserirOrdemManual(Carteira& carteira) {
     std::cout << "Corretora: ";
     std::cin.ignore();
     std::getline(std::cin, ordem.corretora);
+    ordem.corretora = padronizarNome(ordem.corretora);
 
     std::cout << "Quantidade: ";
     std::cin >> ordem.quantidade;
