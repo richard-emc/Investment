@@ -8,8 +8,9 @@
 #include <cctype>
 #include <algorithm>
 #include <limits>
+#include <regex>
 
-
+bool dataValida(const std::string& data);
 
 std::string paraMaiusculas(const std::string& str) {
     std::string resultado = str;
@@ -17,7 +18,6 @@ std::string paraMaiusculas(const std::string& str) {
                    [](unsigned char c){ return std::toupper(c); });
     return resultado;
 }
-
 // Função para ler um número com virgula ou ponto e retornar como double
 double lerDouble() {
     std::string entrada;
@@ -65,17 +65,50 @@ TipoAtivo tipoDeString(const std::string& str) {
     throw std::invalid_argument("Tipo de ativo inválido: " + str);
 }
 
+bool dataValida(const std::string& data) {
+    // Expressão regular para YYYY-MM-DD
+    std::regex re(R"(^\d{4}-\d{2}-\d{2}$)");
+    if (!std::regex_match(data, re)) return false;
+
+    int ano, mes, dia;
+    char sep1, sep2;
+    std::istringstream iss(data);
+    if (!(iss >> ano >> sep1 >> mes >> sep2 >> dia)) return false;
+    if (sep1 != '-' || sep2 != '-') return false;
+    if (mes < 1 || mes > 12) return false;
+    if (dia < 1 || dia > 31) return false; // Para simplificação, não verifica meses de 30/31 dias ou ano bissexto
+    return true;
+}
+
 void InputManager::inserirOrdemManual(Carteira& carteira) {
     Ordem ordem;
-    std::string tipoStr;
+    std::string tipoStr, tipoAtivoStr;
 
-    std::cout << "Data (YYYY-MM-DD): ";
-    std::cin >> ordem.data;
+    std::string data;
+    do {
+        std::cout << "Data (YYYY-MM-DD): ";
+        std::cin >> data;
+        if (!dataValida(data)) {
+            std::cout << "Data inválida! Tente novamente.\n";
+        }
+    } while (!dataValida(data));
+    ordem.data = data;
 
     std::cout << "Ticker: ";
     std::cin >> ordem.ticker;
     ordem.ticker = paraMaiusculas(ordem.ticker);
 
+    std::cout << "Tipo do ativo (ACAO/ETF/FII/FIIAGRO/FIIINFRA/REIT/TESOURO/BDR/CRIPTO): ";
+    std::cin >> tipoAtivoStr;
+    tipoAtivoStr = paraMaiusculas(tipoAtivoStr);
+
+    TipoAtivo tipoAtivo;
+    try {
+        tipoAtivo = tipoDeString(tipoAtivoStr);
+    } catch (const std::exception& e) {
+        std::cout << "Tipo de ativo inválido.\n";
+        return;
+    }
 
     std::cout << "Tipo (COMPRA/VENDA): ";
     std::cin >> tipoStr;
@@ -99,8 +132,10 @@ void InputManager::inserirOrdemManual(Carteira& carteira) {
     std::cin >> ordem.preco;
 
     // Aplica ordem na carteira
-    if (carteira.aplicarOrdem(ordem)) {
+    if (carteira.aplicarOrdem(ordem, tipoAtivo)) {
         std::cout << "Ordem aplicada com sucesso!\n";
+    } else {
+        std::cerr << "⚠️ Ordem não aplicada. Verifique os dados.\n";
     }
 }
 
@@ -178,30 +213,33 @@ void InputManager::carregarCSV(Carteira& carteira, const std::string& caminhoArq
     std::string cabecalho;
     std::getline(arquivo, cabecalho);  // descarta o cabeçalho
 
+    // Exemplo de leitura robusta
     while (std::getline(arquivo, linha)) {
         std::istringstream ss(linha);
-        std::string ticker, tipoStr, corretora;
-        double quantidade, preco;
+        std::string ticker, tipoStr, corretora, qtdStr, precoStr;
 
-        std::getline(ss, ticker, ',');
-        std::getline(ss, tipoStr, ',');
-        std::getline(ss, corretora, ',');
-        corretora = padronizarNome(corretora);
-        ss >> quantidade;
-        ss.ignore(); // ignora a vírgula
-        ss >> preco;
+        if (!std::getline(ss, ticker, ',')) continue;
+        if (!std::getline(ss, tipoStr, ',')) continue;
+        if (!std::getline(ss, corretora, ',')) continue;
+        if (!std::getline(ss, qtdStr, ',')) continue;
+        if (!std::getline(ss, precoStr, ',')) continue;
 
         try {
-            Ativo ativo = {
-                ticker,
-                tipoDeString(tipoStr),
-                corretora,
-                quantidade,
-                preco
-            };
-            carteira.adicionarAtivo(ativo);
+            double quantidade = std::stod(qtdStr);
+            // Troca vírgula por ponto antes de converter
+            std::replace(precoStr.begin(), precoStr.end(), ',', '.');
+            double preco_medio = std::stod(precoStr);
+
+            Ativo novoAtivo;
+            novoAtivo.ticker = paraMaiusculas(ticker);
+            novoAtivo.tipo = tipoDeString(paraMaiusculas(tipoStr));
+            novoAtivo.corretora = padronizarNome(corretora);
+            novoAtivo.quantidade = quantidade;
+            novoAtivo.preco_medio = preco_medio;
+            carteira.adicionarAtivo(novoAtivo);
         } catch (const std::exception& e) {
-            std::cerr << "Erro na linha: " << linha << " → " << e.what() << "\n";
+            std::cerr << "Erro ao ler linha do CSV: " << linha << "\n";
+            continue;
         }
     }
 
@@ -210,6 +248,8 @@ void InputManager::carregarCSV(Carteira& carteira, const std::string& caminhoArq
     std::cout << "💾 Carteira atualizada e salva automaticamente.\n";
 
 }
+
+
 
 
 

@@ -21,11 +21,10 @@ int main() {
     do {
         std::cout << "===== Menu =====\n";
         std::cout << "1 - Inserir ordem manualmente\n";
-        std::cout << "2 - Carregar ordens de arquivo CSV\n";
-        std::cout << "3 - Listar ativos\n";
-        std::cout << "4 - Salvar carteira e histórico de ordens\n";
-        std::cout << "5 - Mostrar ordens por ticker\n";
-        std::cout << "6 - Sair\n";
+        std::cout << "2 - Listar ativos\n";
+        std::cout << "3 - Salvar carteira e histórico de ordens\n";
+        std::cout << "4 - Mostrar ordens por ticker\n";
+        std::cout << "5 - Sair\n";
         std::cout << "Escolha: ";
         std::cin >> escolha;
 
@@ -41,26 +40,17 @@ int main() {
                 inputManager.inserirOrdemManual(minhaCarteira); // Função que pede dados da ordem e aplica
                 break;
 
-            case 2: {
-                std::cin.ignore();
-                std::string caminhoOrdens;
-                std::cout << "Digite o caminho do arquivo CSV de ordens: ";
-                std::getline(std::cin, caminhoOrdens);
-                inputManager.carregarHistoricoDeOrdens(minhaCarteira, caminhoOrdens);
-                break;
-            }
-
-            case 3:
+            case 2:
                 minhaCarteira.listarAtivos();
                 break;
 
-            case 4:
+            case 3:
                 minhaCarteira.salvarCSV(CAMINHO_CARTEIRA);
                 inputManager.salvarHistoricoOrdens(CAMINHO_ORDENS, minhaCarteira.getOrdens());
                 std::cout << "Carteira e histórico salvos.\n";
                 break;
 
-            case 5: {
+            case 4: {
                 std::cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n'); // limpa o buffer
                 std::string tickerConsulta;
                 std::cout << "Digite o ticker para mostrar ordens: ";
@@ -83,7 +73,7 @@ int main() {
                 }
 
 
-            case 6:
+            case 5:
                 minhaCarteira.salvarCSV(CAMINHO_CARTEIRA);
                 inputManager.salvarHistoricoOrdens(CAMINHO_ORDENS, minhaCarteira.getOrdens());
                 std::cout << "Saindo... Carteira e histórico salvos.\n";
@@ -92,7 +82,7 @@ int main() {
             default:
                 std::cout << "Opção inválida.\n";
         }
-    } while (escolha != 6);
+    } while (escolha != 5);
 
     return 0;
 }

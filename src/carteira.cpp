@@ -48,41 +48,49 @@ Ativo* Carteira::buscarAtivo(const std::string& ticker, const std::string& corre
     return nullptr;
 }
 
-bool Carteira::aplicarOrdem(const Ordem& ordem) {
+bool Carteira::aplicarOrdem(const Ordem& ordem, TipoAtivo tipoAtivo) {
     Ativo* ativo = buscarAtivo(ordem.ticker, ordem.corretora);
 
     if (ordem.tipo == TipoOrdem::COMPRA) {
         if (ativo) {
-            ativo->atualizarCompra(ordem.quantidade, ordem.preco);
+            ativo->comprar(ordem.quantidade, ordem.preco);
         } else {
-            // Criar novo ativo na carteira
-            Ativo novo;
-            novo.ticker = ordem.ticker;
-            novo.corretora = ordem.corretora;
-            novo.quantidade = ordem.quantidade;
-            novo.preco_medio = ordem.preco;
-            // Tipo idealmente viria da ordem ou input do usuário (pode ajustar)
-            novo.tipo = TipoAtivo::ACAO;  // padrão ou parametrizar
-            adicionarAtivo(novo);
+            // Cria novo ativo com o tipo informado
+            Ativo novoAtivo;
+            novoAtivo.ticker = ordem.ticker;
+            novoAtivo.tipo = tipoAtivo;
+            novoAtivo.corretora = ordem.corretora;
+            novoAtivo.quantidade = 0;
+            novoAtivo.preco_medio = 0;
+            novoAtivo.comprar(ordem.quantidade, ordem.preco);
+            ativos.push_back(novoAtivo);
         }
-            // Se aplicada com sucesso, adiciona a ordem no histórico
         ordens.push_back(ordem);
         return true;
-        } else if (ordem.tipo == TipoOrdem::VENDA) {
-    if (!ativo) {
-        std::cerr << "Erro: Tentando vender ativo não existente.\n";
-        return false;
-    }
-    if (!ativo->atualizarVenda(ordem.quantidade)) {
-        std::cerr << "Erro: Quantidade a vender maior que disponível.\n";
-        return false;
-    }
-    // Adiciona a ordem de venda no histórico
-    ordens.push_back(ordem);
-    // Se quantidade zerada, pode remover ativo (implementação opcional)
-    return true;
-    }
+    } else if (ordem.tipo == TipoOrdem::VENDA) {
+        if (!ativo) {
+            std::cout << "Ativo não encontrado para venda.\n";
+            return false;
+        }
+        if (ordem.quantidade > ativo->quantidade) {
+            std::cout << "Quantidade insuficiente para venda.\n";
+            return false;
+        }
 
+        double lucroPrejuizo = ativo->vender(ordem.quantidade, ordem.preco);
+        std::cout << "Lucro/Prejuízo nesta venda: " << doubleToStringBR(lucroPrejuizo) << "\n";
+
+        // Remove ativo se zerou
+        if (ativo->quantidade == 0) {
+            ativos.erase(std::remove_if(ativos.begin(), ativos.end(),
+                [&](const Ativo& a) {
+                    return a.ticker == ativo->ticker && a.corretora == ativo->corretora;
+                }), ativos.end());
+        }
+
+        ordens.push_back(ordem);
+        return true;
+    }
     return false;
 }
 
@@ -107,7 +115,6 @@ std::vector<Ordem> Carteira::buscarOrdensPorTicker(const std::string& ticker) co
     return resultado;
 }
 
-// Retorna referência constante para o vetor de ordens
 const std::vector<Ordem>& Carteira::getOrdens() const {
     return ordens;
 }
@@ -126,7 +133,7 @@ void Carteira::salvarCSV(const std::string& caminhoArquivo) const {
                 << tipoParaString(ativo.tipo) << ","
                 << ativo.corretora << ","
                 << ativo.quantidade << ","
-                << std::fixed << std::setprecision(2) << ativo.preco_medio
+                << doubleToStringBR(ativo.preco_medio)
                 << "\n";
     }
 }
