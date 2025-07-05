@@ -13,10 +13,12 @@ int main() {
     if (std::filesystem::exists(CAMINHO_ORDENS)) {
         inputManager.carregarHistoricoDeOrdens(minhaCarteira, CAMINHO_ORDENS);
         inputManager.salvarHistoricoOrdens(CAMINHO_ORDENS, minhaCarteira.getOrdens());
+        minhaCarteira.salvarCSV(CAMINHO_CARTEIRA);
+
         std::cout << "Histórico de ordens carregado de '" << CAMINHO_ORDENS << "'\n";
     }
 
-
+minhaCarteira.salvarCSV(CAMINHO_CARTEIRA);
     int escolha;
     do {
         std::cout << "===== Menu =====\n";
@@ -37,7 +39,8 @@ int main() {
 
         switch(escolha) {
             case 1:
-                inputManager.inserirOrdemManual(minhaCarteira); // Função que pede dados da ordem e aplica
+                inputManager.inserirOrdemManual(minhaCarteira);
+                inputManager.salvarHistoricoOrdens(CAMINHO_ORDENS, minhaCarteira.getOrdens());
                 break;
 
             case 2:

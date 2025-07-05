@@ -13,6 +13,7 @@ struct Ordem {
     std::string data;    // Exemplo: "2025-06-28"
     std::string ticker;
     TipoOrdem tipo;
+    TipoAtivo tipoAtivo; // Tipo do ativo (ACAO, ETF, etc.)
     std::string corretora;
     double quantidade;
     double preco;

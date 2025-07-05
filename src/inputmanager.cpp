@@ -101,6 +101,12 @@ void InputManager::inserirOrdemManual(Carteira& carteira) {
     std::cout << "Tipo do ativo (ACAO/ETF/FII/FIIAGRO/FIIINFRA/REIT/TESOURO/BDR/CRIPTO): ";
     std::cin >> tipoAtivoStr;
     tipoAtivoStr = paraMaiusculas(tipoAtivoStr);
+    try {
+        ordem.tipoAtivo = tipoDeString(tipoAtivoStr);
+    } catch (const std::exception& e) {
+        std::cout << "Tipo de ativo inválido.\n";
+        return;
+    }
 
     TipoAtivo tipoAtivo;
     try {
@@ -126,11 +132,11 @@ void InputManager::inserirOrdemManual(Carteira& carteira) {
     ordem.corretora = padronizarNome(ordem.corretora);
 
     std::cout << "Quantidade: ";
-    std::cin >> ordem.quantidade;
-
+    ordem.quantidade = lerDouble();
+    
     std::cout << "Preço: ";
-    std::cin >> ordem.preco;
-
+    ordem.preco = lerDouble();
+    
     // Aplica ordem na carteira
     if (carteira.aplicarOrdem(ordem, tipoAtivo)) {
         std::cout << "Ordem aplicada com sucesso!\n";
@@ -154,25 +160,33 @@ void InputManager::carregarHistoricoDeOrdens(Carteira& carteira, const std::stri
 
     while (std::getline(arquivo, linha)) {
         std::istringstream ss(linha);
-        std::string tipoStr, ticker, corretora, quantidadeStr, precoStr, data;
+        std::string tipoStr, ticker, tipoAtivoStr, corretora, quantidadeStr, precoStr, data;
 
         std::getline(ss, tipoStr, ',');
         std::getline(ss, ticker, ',');
+        std::getline(ss, tipoAtivoStr, ',');
         std::getline(ss, corretora, ',');
         std::getline(ss, quantidadeStr, ',');
         std::getline(ss, precoStr, ',');
         std::getline(ss, data);
 
+        if (!dataValida(data)) {
+        std::cerr << "⚠️ Data inválida na linha: " << linha << "\n";
+        continue;
+}
+
         try {
             Ordem ordem;
             ordem.tipo = (paraMaiusculas(tipoStr) == "COMPRA") ? TipoOrdem::COMPRA : TipoOrdem::VENDA;
             ordem.ticker = paraMaiusculas(ticker);
+            ordem.tipoAtivo = tipoDeString(paraMaiusculas(tipoAtivoStr));
             ordem.corretora = padronizarNome(corretora);
             ordem.quantidade = std::stod(quantidadeStr);
+            std::replace(precoStr.begin(), precoStr.end(), ',', '.');
             ordem.preco = std::stod(precoStr);
             ordem.data = data;
 
-            if (!carteira.aplicarOrdem(ordem)) {
+            if (!carteira.aplicarOrdem(ordem, ordem.tipoAtivo)) {
                 std::cerr << "⚠️ Ordem ignorada (não aplicada): " << linha << "\n";
             }
 
@@ -184,17 +198,18 @@ void InputManager::carregarHistoricoDeOrdens(Carteira& carteira, const std::stri
     std::cout << "✅ Histórico de ordens carregado e aplicado com sucesso.\n";
 }
 
-void InputManager::salvarHistoricoOrdens(const std::string& caminhoArquivo, const std::vector<Ordem>& ordens) {
+void InputManager::salvarHistoricoOrdens(const std::string& caminhoArquivo, const std::vector<Ordem>& ordens) { 
     std::ofstream arquivo(caminhoArquivo);
     if (!arquivo.is_open()) {
         std::cerr << "Erro ao abrir arquivo para salvar histórico de ordens.\n";
         return;
     }
 
-    arquivo << "TIPO,TICKER,CORRETORA,QUANTIDADE,PRECO,DATA\n";
+    arquivo << "TIPO,TICKER,TIPOAtIVO,CORRETORA,QUANTIDADE,PRECO,DATA\n";
     for (const auto& ordem : ordens) {
         arquivo << (ordem.tipo == TipoOrdem::COMPRA ? "COMPRA" : "VENDA") << ","
                 << ordem.ticker << ","
+                << tipoParaString(ordem.tipoAtivo) << ","
                 << ordem.corretora << ","
                 << ordem.quantidade << ","
                 << ordem.preco << ","
@@ -213,7 +228,6 @@ void InputManager::carregarCSV(Carteira& carteira, const std::string& caminhoArq
     std::string cabecalho;
     std::getline(arquivo, cabecalho);  // descarta o cabeçalho
 
-    // Exemplo de leitura robusta
     while (std::getline(arquivo, linha)) {
         std::istringstream ss(linha);
         std::string ticker, tipoStr, corretora, qtdStr, precoStr;

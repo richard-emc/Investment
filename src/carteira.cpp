@@ -80,6 +80,9 @@ bool Carteira::aplicarOrdem(const Ordem& ordem, TipoAtivo tipoAtivo) {
         double lucroPrejuizo = ativo->vender(ordem.quantidade, ordem.preco);
         std::cout << "Lucro/Prejuízo nesta venda: " << doubleToStringBR(lucroPrejuizo) << "\n";
 
+        // NOVO: registra fechamento
+        registrarFechamento(ordem, lucroPrejuizo, ativo->preco_medio, ativo->tipo);
+
         // Remove ativo se zerou
         if (ativo->quantidade == 0) {
             ativos.erase(std::remove_if(ativos.begin(), ativos.end(),
@@ -92,6 +95,42 @@ bool Carteira::aplicarOrdem(const Ordem& ordem, TipoAtivo tipoAtivo) {
         return true;
     }
     return false;
+}
+
+void Carteira::registrarFechamento(const Ordem& ordem, double lucroPrejuizo, double preco_medio, TipoAtivo tipoAtivo) {
+    std::ofstream arquivo("historico_fechamento.csv", std::ios::app);
+    if (!arquivo.is_open()) {
+        std::cerr << "Erro ao abrir historico_fechamento.csv\n";
+        return;
+    }
+
+    // Escreve cabeçalho se o arquivo está vazio
+    arquivo.seekp(0, std::ios::end);
+    if (arquivo.tellp() == 0) {
+        arquivo << "DATA,TICKER,CORRETORA,QUANTIDADE,PRECO_VENDA,PRECO_MEDIO,LUCRO_PREJUIZO,IMPOSTO\n";
+    }
+
+    // Calcula imposto se for ETF, FII, FIIAGRO, FIIINFRA, BDR
+    double imposto = 0.0;
+    if (
+        tipoAtivo == TipoAtivo::ETF ||
+        tipoAtivo == TipoAtivo::FII ||
+        tipoAtivo == TipoAtivo::FIIAGRO ||
+        tipoAtivo == TipoAtivo::FIIINFRA ||
+        tipoAtivo == TipoAtivo::BDR
+    ) {
+        if (lucroPrejuizo > 0)
+            imposto = lucroPrejuizo * 0.15;
+    }
+
+    arquivo << ordem.data << ","
+            << ordem.ticker << ","
+            << ordem.corretora << ","
+            << ordem.quantidade << ","
+            << ordem.preco << ","
+            << preco_medio << ","
+            << lucroPrejuizo << ","
+            << imposto << "\n";
 }
 
 void Carteira::listarAtivos() const {
@@ -133,7 +172,7 @@ void Carteira::salvarCSV(const std::string& caminhoArquivo) const {
                 << tipoParaString(ativo.tipo) << ","
                 << ativo.corretora << ","
                 << ativo.quantidade << ","
-                << doubleToStringBR(ativo.preco_medio)
+                << std::fixed << std::setprecision(2) << (ativo.preco_medio)
                 << "\n";
     }
 }

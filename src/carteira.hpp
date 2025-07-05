@@ -28,6 +28,9 @@ public:
 private:
     std::vector<Ativo> ativos;
     std::vector<Ordem> ordens;
+
+    void registrarFechamento(const Ordem& ordem, double lucroPrejuizo, double preco_medio, TipoAtivo tipoAtivo);
+
 };
     std::string tipoParaString(TipoAtivo tipo);
 
