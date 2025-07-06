@@ -7,7 +7,7 @@
 class InputManager {
 public:
     void inserirOrdemManual(Carteira& carteira);
-    void carregarCSV(Carteira& carteira, const std::string& caminhoArquivo);
+    void carregarCarteira(Carteira& carteira, const std::string& caminhoArquivo);
     void carregarHistoricoDeOrdens(Carteira& carteira, const std::string& caminhoHistorico);
     void salvarHistoricoOrdens(const std::string& caminhoArquivo, const std::vector<Ordem>& ordens);
 };

@@ -18,6 +18,7 @@ std::string paraMaiusculas(const std::string& str) {
                    [](unsigned char c){ return std::toupper(c); });
     return resultado;
 }
+
 // Função para ler um número com virgula ou ponto e retornar como double
 double lerDouble() {
     std::string entrada;
@@ -98,24 +99,6 @@ void InputManager::inserirOrdemManual(Carteira& carteira) {
     std::cin >> ordem.ticker;
     ordem.ticker = paraMaiusculas(ordem.ticker);
 
-    std::cout << "Tipo do ativo (ACAO/ETF/FII/FIIAGRO/FIIINFRA/REIT/TESOURO/BDR/CRIPTO): ";
-    std::cin >> tipoAtivoStr;
-    tipoAtivoStr = paraMaiusculas(tipoAtivoStr);
-    try {
-        ordem.tipoAtivo = tipoDeString(tipoAtivoStr);
-    } catch (const std::exception& e) {
-        std::cout << "Tipo de ativo inválido.\n";
-        return;
-    }
-
-    TipoAtivo tipoAtivo;
-    try {
-        tipoAtivo = tipoDeString(tipoAtivoStr);
-    } catch (const std::exception& e) {
-        std::cout << "Tipo de ativo inválido.\n";
-        return;
-    }
-
     std::cout << "Tipo (COMPRA/VENDA): ";
     std::cin >> tipoStr;
     tipoStr = paraMaiusculas(tipoStr);
@@ -131,6 +114,27 @@ void InputManager::inserirOrdemManual(Carteira& carteira) {
     std::getline(std::cin, ordem.corretora);
     ordem.corretora = padronizarNome(ordem.corretora);
 
+    if (ordem.tipo == TipoOrdem::COMPRA) {
+        std::cout << "Tipo do ativo (ACAO/ETF/FII/FIIAGRO/FIIINFRA/REIT/TESOURO/BDR/CRIPTO): ";
+        std::cin >> tipoAtivoStr;
+        tipoAtivoStr = paraMaiusculas(tipoAtivoStr);
+        try {
+            ordem.tipoAtivo = tipoDeString(tipoAtivoStr);
+        } catch (const std::exception& e) {
+            std::cout << "Tipo de ativo inválido.\n";
+            return;
+        }
+    } else { // VENDA
+        // Busca o ativo na carteira para obter o tipo
+        Ativo* ativo = carteira.buscarAtivo(ordem.ticker, ordem.corretora);
+        if (!ativo) {
+            std::cerr << "Ativo não encontrado para venda.\n";
+            return;
+        }
+        ordem.tipoAtivo = ativo->tipo;
+    }
+
+
     std::cout << "Quantidade: ";
     ordem.quantidade = lerDouble();
     
@@ -138,7 +142,7 @@ void InputManager::inserirOrdemManual(Carteira& carteira) {
     ordem.preco = lerDouble();
     
     // Aplica ordem na carteira
-    if (carteira.aplicarOrdem(ordem, tipoAtivo)) {
+    if (carteira.aplicarOrdem(ordem, ordem.tipoAtivo)) {
         std::cout << "Ordem aplicada com sucesso!\n";
     } else {
         std::cerr << "⚠️ Ordem não aplicada. Verifique os dados.\n";
@@ -173,7 +177,7 @@ void InputManager::carregarHistoricoDeOrdens(Carteira& carteira, const std::stri
         if (!dataValida(data)) {
         std::cerr << "⚠️ Data inválida na linha: " << linha << "\n";
         continue;
-}
+        }
 
         try {
             Ordem ordem;
@@ -217,7 +221,7 @@ void InputManager::salvarHistoricoOrdens(const std::string& caminhoArquivo, cons
     }
 }
 
-void InputManager::carregarCSV(Carteira& carteira, const std::string& caminhoArquivo) {
+void InputManager::carregarCarteira(Carteira& carteira, const std::string& caminhoArquivo) {
     std::ifstream arquivo(caminhoArquivo);
     if (!arquivo.is_open()) {
         std::cerr << "❌ Não foi possível abrir o arquivo.\n";
@@ -258,7 +262,7 @@ void InputManager::carregarCSV(Carteira& carteira, const std::string& caminhoArq
     }
 
     std::cout << "✅ Arquivo carregado com sucesso!\n";
-    carteira.salvarCSV("carteira.csv");
+    carteira.salvarCarteira("carteira.csv");
     std::cout << "💾 Carteira atualizada e salva automaticamente.\n";
 
 }

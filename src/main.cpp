@@ -13,12 +13,11 @@ int main() {
     if (std::filesystem::exists(CAMINHO_ORDENS)) {
         inputManager.carregarHistoricoDeOrdens(minhaCarteira, CAMINHO_ORDENS);
         inputManager.salvarHistoricoOrdens(CAMINHO_ORDENS, minhaCarteira.getOrdens());
-        minhaCarteira.salvarCSV(CAMINHO_CARTEIRA);
+        minhaCarteira.salvarCarteira(CAMINHO_CARTEIRA);
 
         std::cout << "Histórico de ordens carregado de '" << CAMINHO_ORDENS << "'\n";
     }
 
-minhaCarteira.salvarCSV(CAMINHO_CARTEIRA);
     int escolha;
     do {
         std::cout << "===== Menu =====\n";
@@ -40,6 +39,7 @@ minhaCarteira.salvarCSV(CAMINHO_CARTEIRA);
         switch(escolha) {
             case 1:
                 inputManager.inserirOrdemManual(minhaCarteira);
+                minhaCarteira.salvarCarteira(CAMINHO_CARTEIRA);
                 inputManager.salvarHistoricoOrdens(CAMINHO_ORDENS, minhaCarteira.getOrdens());
                 break;
 
@@ -48,7 +48,7 @@ minhaCarteira.salvarCSV(CAMINHO_CARTEIRA);
                 break;
 
             case 3:
-                minhaCarteira.salvarCSV(CAMINHO_CARTEIRA);
+                minhaCarteira.salvarCarteira(CAMINHO_CARTEIRA);
                 inputManager.salvarHistoricoOrdens(CAMINHO_ORDENS, minhaCarteira.getOrdens());
                 std::cout << "Carteira e histórico salvos.\n";
                 break;
@@ -77,7 +77,7 @@ minhaCarteira.salvarCSV(CAMINHO_CARTEIRA);
 
 
             case 5:
-                minhaCarteira.salvarCSV(CAMINHO_CARTEIRA);
+                minhaCarteira.salvarCarteira(CAMINHO_CARTEIRA);
                 inputManager.salvarHistoricoOrdens(CAMINHO_ORDENS, minhaCarteira.getOrdens());
                 std::cout << "Saindo... Carteira e histórico salvos.\n";
                 break;

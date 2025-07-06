@@ -158,7 +158,7 @@ const std::vector<Ordem>& Carteira::getOrdens() const {
     return ordens;
 }
 
-void Carteira::salvarCSV(const std::string& caminhoArquivo) const {
+void Carteira::salvarCarteira(const std::string& caminhoArquivo) const {
     std::ofstream arquivo(caminhoArquivo);
     if (!arquivo.is_open()) {
         std::cerr << "Erro ao abrir arquivo para salvar.\n";

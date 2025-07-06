@@ -11,7 +11,7 @@ public:
     void limpar();
     void adicionarAtivo(const Ativo& ativo);
     void listarAtivos() const;
-    void salvarCSV(const std::string& caminhoArquivo) const;
+    void salvarCarteira(const std::string& caminhoArquivo) const;
     void carregarCSV(const std::string& caminhoArquivo);
     // Getter para o vetor de ordens
     const std::vector<Ordem>& getOrdens() const;
