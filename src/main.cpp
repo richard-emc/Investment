@@ -25,7 +25,9 @@ int main() {
         std::cout << "2 - Listar ativos\n";
         std::cout << "3 - Salvar carteira e histórico de ordens\n";
         std::cout << "4 - Mostrar ordens por ticker\n";
-        std::cout << "5 - Sair\n";
+        std::cout << "5 - Registrar valor mensal do ativor\n";
+        std::cout << "6 - Mostrar Rentabilidade mensal de um ativo\n";
+        std::cout << "7 - Sair\n";
         std::cout << "Escolha: ";
         std::cin >> escolha;
 
@@ -74,9 +76,50 @@ int main() {
                 }
                 break;
                 }
+            
+            case 5: {
+                std::string ticker, corretora, mes;
+                double valor;
+                std::cout << "Ticker: "; std::cin >> ticker;
+                std::cout << "Corretora: "; std::cin.ignore(); std::getline(std::cin, corretora);
+                std::cout << "Mês (YYYY-MM): "; std::cin >> mes;
+                std::cout << "Valor de fechamento: "; std::cin >> valor;
+                Ativo* ativo = minhaCarteira.buscarAtivo(paraMaiusculas(ticker), padronizarNome(corretora));
+                if (ativo) {
+                    ativo->registrarValorMensal(mes, valor);
+                    ativo->salvarHistoricoValor(ticker + "_valores.csv");
+                    std::cout << "Valor registrado!\n";
+                } else {
+                    std::cout << "Ativo não encontrado.\n";
+                }
+                break;
+            }
+            
 
+            case 6: {
+                std::string ticker, corretora;
+                std::cout << "Ticker: "; std::cin >> ticker;
+                std::cout << "Corretora: "; std::cin.ignore(); std::getline(std::cin, corretora);
+                Ativo* ativo = minhaCarteira.buscarAtivo(paraMaiusculas(ticker), padronizarNome(corretora));
+                if (ativo) {
+                    // Carrega histórico de valores se existir
+                    ativo->carregarHistoricoValor(ticker + "_valores.csv");
+                    auto rentabilidades = ativo->rentabilidadeMensal();
+                    if (rentabilidades.empty()) {
+                        std::cout << "Não há dados suficientes para calcular rentabilidade.\n";
+                    } else {
+                        std::cout << "Rentabilidade mensal para " << ticker << ":\n";
+                        for (const auto& [mes, rent] : rentabilidades) {
+                            std::cout << mes << ": " << rent << "%\n";
+                        }
+                    }
+                } else {
+                    std::cout << "Ativo não encontrado.\n";
+                }
+                break;
+            }
 
-            case 5:
+            case 7:
                 minhaCarteira.salvarCarteira(CAMINHO_CARTEIRA);
                 inputManager.salvarHistoricoOrdens(CAMINHO_ORDENS, minhaCarteira.getOrdens());
                 std::cout << "Saindo... Carteira e histórico salvos.\n";
@@ -85,7 +128,7 @@ int main() {
             default:
                 std::cout << "Opção inválida.\n";
         }
-    } while (escolha != 5);
+    } while (escolha != 7);
 
     return 0;
 }

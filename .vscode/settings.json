@@ -50,6 +50,8 @@
         "ctime": "cpp",
         "iomanip": "cpp",
         "codecvt": "cpp",
-        "ratio": "cpp"
+        "ratio": "cpp",
+        "bitset": "cpp",
+        "regex": "cpp"
     }
 }

@@ -110,10 +110,10 @@ void InputManager::inserirOrdemManual(Carteira& carteira) {
     }
 
     std::cout << "Corretora: ";
-    std::cin.ignore();
+     std::cin.ignore();
     std::getline(std::cin, ordem.corretora);
     ordem.corretora = padronizarNome(ordem.corretora);
-
+    std::cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
     if (ordem.tipo == TipoOrdem::COMPRA) {
         std::cout << "Tipo do ativo (ACAO/ETF/FII/FIIAGRO/FIIINFRA/REIT/TESOURO/BDR/CRIPTO): ";
         std::cin >> tipoAtivoStr;

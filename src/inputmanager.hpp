@@ -13,5 +13,6 @@ public:
 };
 
 std::string paraMaiusculas(const std::string& str);
+std::string padronizarNome(const std::string& entrada);
 
 #endif
