@@ -5,6 +5,7 @@
 #include <sstream>
 #include <algorithm>
 
+// Salva o histórico de valores mensais em um arquivo CSV
 void Ativo::salvarHistoricoValor(const std::string& caminho) const {
     std::ofstream arq(caminho);
     if (!arq.is_open()) return;
@@ -14,6 +15,7 @@ void Ativo::salvarHistoricoValor(const std::string& caminho) const {
     }
 }
 
+// Carrega o histórico de valores mensais do arquivo
 void Ativo::carregarHistoricoValor(const std::string& caminho) {
     std::ifstream arq(caminho);
     if (!arq.is_open()) return;
@@ -28,12 +30,13 @@ void Ativo::carregarHistoricoValor(const std::string& caminho) {
     }
 }
 
-    // Registra o valor mensal do ativo
-    void Ativo::registrarValorMensal(const std::string& mes, double valor) {
+// Registra o valor mensal do ativo
+void Ativo::registrarValorMensal(const std::string& mes, double valor) {
     historico_valor[mes] = valor;
 }
 
-    std::vector<std::pair<std::string, double>> Ativo::rentabilidadeMensal() const {
+// Retorna um vetor de pares <mes, rentabilidade (%)>
+std::vector<std::pair<std::string, double>> Ativo::rentabilidadeMensal() const {
     std::vector<std::pair<std::string, double>> resultado;
     if (historico_valor.size() < 2) return resultado;
 
