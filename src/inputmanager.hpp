@@ -12,7 +12,6 @@ public:
     void salvarHistoricoOrdens(const std::string& caminhoArquivo, const std::vector<Ordem>& ordens);
 };
 
-std::string paraMaiusculas(const std::string& str);
-std::string padronizarNome(const std::string& entrada);
+
 
 #endif

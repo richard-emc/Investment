@@ -2,6 +2,9 @@
 #include <filesystem>
 #include "carteira.hpp"
 #include "inputmanager.hpp"
+#include "ativo.hpp"
+#include "ordem.hpp"
+#include "utils.hpp"
 
 int main() {
     Carteira minhaCarteira;
