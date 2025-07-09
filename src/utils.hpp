@@ -11,4 +11,6 @@ double lerDouble();
 bool dataValida(const std::string& data);
 TipoAtivo tipoDeString(const std::string& str);
 
+void buscarValoresOnline(const std::string& ticker, std::map<std::string, double>& historico_valor);
+
 #endif

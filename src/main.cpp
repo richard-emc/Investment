@@ -29,8 +29,12 @@ int main() {
         std::cout << "3 - Salvar carteira e histórico de ordens\n";
         std::cout << "4 - Mostrar ordens por ticker\n";
         std::cout << "5 - Registrar valor mensal do ativor\n";
-        std::cout << "6 - Mostrar Rentabilidade mensal de um ativo\n";
-        std::cout << "7 - Sair\n";
+        std::cout << "6 - Inserir provento (dividendo/JCP)\n";
+        std::cout << "7 - Atualizar valores mensais automaticamente\n";
+        std::cout << "8 - Exibir histórico de valores de um ativo\n";      
+        std::cout << "9 - Exibir dividendos por ativo\n";
+        std::cout << "10 - Exibir rentabilidade acomulada\n";
+        std::cout << "11 - Sair\n";
         std::cout << "Escolha: ";
         std::cin >> escolha;
 
@@ -98,8 +102,59 @@ int main() {
                 break;
             }
             
-
             case 6: {
+                std::string ticker, corretora, tipoProvento, dataCom, dataPagamento;
+                double valor;
+                std::cout << "Ticker: "; std::cin >> ticker;
+                std::cout << "Corretora: "; std::cin.ignore(); std::getline(std::cin, corretora);
+
+                Ativo* ativo = minhaCarteira.buscarAtivo(paraMaiusculas(ticker), padronizarNome(corretora));
+                if (!ativo) {
+                    std::cout << "Ativo não encontrado.\n";
+                    break;
+                }
+
+                std::cout << "Tipo de provento (DIVIDENDO/JCP): ";
+                std::getline(std::cin, tipoProvento);
+                tipoProvento = paraMaiusculas(tipoProvento);
+
+                std::cout << "Valor do provento: ";
+                std::cin >> valor;
+                std::cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
+
+                std::cout << "Data COM (YYYY-MM-DD): ";
+                std::getline(std::cin, dataCom);
+
+                std::cout << "Data de pagamento (YYYY-MM-DD): ";
+                std::getline(std::cin, dataPagamento);
+
+                double valorLiquido = valor;
+                if (tipoProvento == "JCP") {
+                    valorLiquido = valor * 0.85; // desconto de 15%
+                    std::cout << "Valor líquido após IR (15%): " << valorLiquido << "\n";
+                }
+
+                // Salva o dividendo no mapa de dividendos, usando a data de pagamento como chave
+                ativo->proventos[dataPagamento] += valorLiquido;
+
+                // (Opcional) Salvar em arquivo específico de proventos
+                std::ofstream arq(ticker + "_proventos.csv", std::ios::app);
+                if (arq.is_open()) {
+                    arq << tipoProvento << "," << valor << "," << valorLiquido << "," << dataCom << "," << dataPagamento << "\n";
+                    arq.close();
+                }
+
+                std::cout << "Provento registrado!\n";
+                break;
+            }
+            
+            case 7: {
+                std::cout << "Funcionalidade de atualização automática ainda não implementada.\n";
+                // No futuro: buscarValoresOnline para cada ativo
+                break;
+            }
+
+            case 8: {
                 std::string ticker, corretora;
                 std::cout << "Ticker: "; std::cin >> ticker;
                 std::cout << "Corretora: "; std::cin.ignore(); std::getline(std::cin, corretora);
@@ -121,8 +176,45 @@ int main() {
                 }
                 break;
             }
+            
+            case 9: {
+                std::string ticker, corretora;
+                std::cout << "Ticker: "; std::cin >> ticker;
+                std::cout << "Corretora: "; std::cin.ignore(); std::getline(std::cin, corretora);
+                Ativo* ativo = minhaCarteira.buscarAtivo(paraMaiusculas(ticker), padronizarNome(corretora));
+                    if (ativo) {
+                        std::cout << "proventos para " << ticker;
+                        for (const auto& prov : ativo->proventos) {
+                            std::cout << "Tipo: " << prov.tipo
+                            << " | Bruto: " << prov.valorBruto
+                            << " | Líquido: " << prov.valorLiquido
+                            << " | Data COM: " << prov.dataCom
+                            << " | Pagamento: " << prov.dataPagamento << "\n";
+                        }
+                    } else {
+                        std::cout << "Ativo não encontrado.\n";
+                    }
+                    break;
+            } 
+            
+            case 10: {
+                std::string ticker, corretora;
+                std::cout << "Ticker: "; std::cin >> ticker;
+                std::cout << "Corretora: "; std::cin.ignore(); std::getline(std::cin, corretora);
+                Ativo* ativo = minhaCarteira.buscarAtivo(paraMaiusculas(ticker), padronizarNome(corretora));
+                if (ativo && !ativo->historico_valor.empty()) {
+                    auto& hist = ativo->historico_valor;
+                    auto primeiro = hist.begin();
+                    auto ultimo = std::prev(hist.end());
+                    double rent = ((ultimo->second - primeiro->second) / primeiro->second) * 100.0;
+                    std::cout << "Rentabilidade acumulada de " << primeiro->first << " até " << ultimo->first << ": " << rent << "%\n";
+                } else {
+                    std::cout << "Ativo não encontrado ou sem histórico.\n";
+                }
+                break;
+            }
 
-            case 7:
+            case 11:
                 minhaCarteira.salvarCarteira(CAMINHO_CARTEIRA);
                 inputManager.salvarHistoricoOrdens(CAMINHO_ORDENS, minhaCarteira.getOrdens());
                 std::cout << "Saindo... Carteira e histórico salvos.\n";
@@ -131,7 +223,7 @@ int main() {
             default:
                 std::cout << "Opção inválida.\n";
         }
-    } while (escolha != 7);
+    } while (escolha != 11);
 
     return 0;
 }

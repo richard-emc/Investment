@@ -76,3 +76,7 @@ TipoAtivo tipoDeString(const std::string& str) {
     if (str == "CRIPTO") return TipoAtivo::CRIPTO;
     throw std::invalid_argument("Tipo de ativo inválido: " + str);
 }
+
+void buscarValoresOnline(const std::string& ticker, std::map<std::string, double>& historico_valor) {
+    // Futuramente: implementar integração com API
+}

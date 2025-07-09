@@ -27,12 +27,11 @@ struct Ativo {
     double quantidade;
     double preco_medio;
 
-
     // Histórico de preço total por mês: {"2025-05": 1200.0}
     std::map<std::string, double> historico_valor;// Retorna um vetor de pares <mes, rentabilidade (%)>
 
     // Dividendos por mês: {"2025-05": 45.0}
-    std::map<std::string, double> dividendos;
+    std::map<std::string, double> proventos;
 
     void registrarValorMensal(const std::string& mes, double valor);
     std::vector<std::pair<std::string, double>> rentabilidadeMensal() const;
@@ -53,6 +52,17 @@ struct Ativo {
         quantidade -= qtd;
         return lucroPrejuizo;
     }
+    
+    struct Provento {
+    std::string tipo; // "DIVIDENDO" ou "JCP"
+    double valorBruto;
+    double valorLiquido;
+    std::string dataCom;
+    std::string dataPagamento;
 };
+std::vector<Provento> proventos;
+};
+
+
 
 #endif
